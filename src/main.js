@@ -1,5 +1,6 @@
 import './index.css'
 import './App.css'
+import EmblaCarousel from 'embla-carousel'
 
 const WEB3FORMS_URL = 'https://api.web3forms.com/submit'
 // niżej dodaje się zdjęcia, wystarczy podać ścieżkę do zdjęcia w folderze photos
@@ -35,13 +36,12 @@ const carouselSources = {
   ],
   Dixie: [
     '/photos/dixie1.jpeg',
-    '/photos/pola2.jpeg',
+    '/photos/dixie2.jpeg',
     '/photos/dixie3.jpeg',
     '/photos/dixie4.jpeg',
     '/photos/dixie5.jpeg',
     '/photos/dixie6.jpeg',
     '/photos/dixie7.jpeg',
-    '/photos/dixie8.jpeg',
   ],
 }
 
@@ -72,47 +72,69 @@ function setupCarousels() {
     const urls = carouselSources[label] || []
     if (urls.length === 0) return
 
-    const image = carousel.querySelector('img')
+    const viewport = carousel.querySelector('.dog-carousel-viewport')
     const dotsContainer = carousel.querySelector('.dog-carousel-dots')
     const prevButton = carousel.querySelector('.dog-carousel-btn-prev')
     const nextButton = carousel.querySelector('.dog-carousel-btn-next')
-    if (!image || !dotsContainer || !prevButton || !nextButton) return
+    if (!viewport || !dotsContainer || !prevButton || !nextButton) return
+
+    viewport.innerHTML = `
+      <div class="dog-carousel-container">
+        ${urls
+          .map(
+            (url, i) => `
+              <div class="dog-carousel-slide">
+                <img
+                  src="${url}"
+                  alt="${label} - zdjęcie ${i + 1} z ${urls.length}"
+                  width="640"
+                  height="400"
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                />
+              </div>
+            `,
+          )
+          .join('')}
+      </div>
+    `
 
     dotsContainer.innerHTML = urls
-      .map((_, i) => `<span class="dog-carousel-dot${i === 0 ? ' is-active' : ''}"></span>`)
+      .map((_, i) => `<button type="button" class="dog-carousel-dot${i === 0 ? ' is-active' : ''}" aria-label="Przejdź do zdjęcia ${i + 1}"></button>`)
       .join('')
-    const dots = dotsContainer.querySelectorAll('.dog-carousel-dot')
+    const dots = Array.from(dotsContainer.querySelectorAll('.dog-carousel-dot'))
 
-    let index = 0
-    const render = () => {
-      image.src = urls[index]
-      image.alt = `${label} - zdjęcie ${index + 1} z ${urls.length} (placeholder)`
-      dots.forEach((dot, dotIndex) => dot.classList.toggle('is-active', dotIndex === index))
-    }
-    const next = () => {
-      index = (index + 1) % urls.length
-      render()
-    }
-    const prev = () => {
-      index = (index - 1 + urls.length) % urls.length
-      render()
+    const embla = EmblaCarousel(viewport, {
+      loop: true,
+      align: 'start',
+    })
+
+    const syncDots = () => {
+      const selected = embla.selectedScrollSnap()
+      dots.forEach((dot, i) => dot.classList.toggle('is-active', i === selected))
     }
 
-    prevButton.addEventListener('click', prev)
-    nextButton.addEventListener('click', next)
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => embla.scrollTo(i))
+    })
+
+    prevButton.addEventListener('click', () => embla.scrollPrev())
+    nextButton.addEventListener('click', () => embla.scrollNext())
     carousel.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowLeft') {
         event.preventDefault()
-        prev()
+        embla.scrollPrev()
       }
       if (event.key === 'ArrowRight') {
         event.preventDefault()
-        next()
+        embla.scrollNext()
       }
     })
 
-    // Ensure first slide is synced on initial page load.
-    render()
+    embla.on('select', syncDots)
+    embla.on('reInit', syncDots)
+    syncDots()
   })
 }
 
