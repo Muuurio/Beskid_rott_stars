@@ -3,45 +3,53 @@ import './App.css'
 import EmblaCarousel from 'embla-carousel'
 
 const WEB3FORMS_URL = 'https://api.web3forms.com/submit'
-// niżej dodaje się zdjęcia, wystarczy podać ścieżkę do zdjęcia w folderze photos
+const photoModules = import.meta.glob('../photos/*.{jpeg,jpg,png,JPEG,JPG,PNG}', {
+  eager: true,
+  import: 'default',
+})
+
+function photo(name) {
+  const key = `../photos/${name}`
+  return photoModules[key] || ''
+}
+
+// niżej dodaje się zdjęcia, wystarczy podać nazwę pliku z folderu photos
 const carouselSources = {
   Aston: [
-    '/photos/aston4.jpeg',
-    '/photos/aston1.jpeg',
-    '/photos/aston3.jpeg',
-    '/photos/aston5.jpeg',
-    '/photos/aston6.jpeg',
-
-
+    photo('aston4.jpeg'),
+    photo('aston1.jpeg'),
+    photo('aston3.jpeg'),
+    photo('aston5.jpeg'),
+    photo('aston6.jpeg'),
   ],
   Pola: [
-    '/photos/pola4.jpeg',
-    '/photos/pola2.jpeg',
-    '/photos/pola1.jpeg',
-    '/photos/pola6.jpeg',
-    '/photos/pola3.jpeg',
-    '/photos/pola5.jpeg',
-    '/photos/pola7.jpeg',
-    '/photos/pola8.jpeg',
+    photo('pola4.jpeg'),
+    photo('pola2.jpeg'),
+    photo('pola1.jpeg'),
+    photo('pola6.jpeg'),
+    photo('pola3.jpeg'),
+    photo('pola5.jpeg'),
+    photo('pola7.jpeg'),
+    photo('pola8.jpeg'),
   ],
   Connie: [
-    '/photos/connie1.jpeg',
-    '/photos/connie2.jpeg',
-    '/photos/connie3.jpeg',
-    '/photos/connie4.jpeg',
-    '/photos/connie5.jpeg',
-    '/photos/connie6.jpeg',
-    '/photos/connie7.jpeg',
-    '/photos/connie8.jpeg',
+    photo('connie1.jpeg'),
+    photo('connie2.jpeg'),
+    photo('connie3.jpeg'),
+    photo('connie4.jpeg'),
+    photo('connie5.jpeg'),
+    photo('connie6.jpeg'),
+    photo('connie7.jpeg'),
+    photo('connie8.jpeg'),
   ],
   Dixie: [
-    '/photos/dixie1.jpeg',
-    '/photos/dixie2.jpeg',
-    '/photos/dixie3.jpeg',
-    '/photos/dixie4.jpeg',
-    '/photos/dixie5.jpeg',
-    '/photos/dixie6.jpeg',
-    '/photos/dixie7.jpeg',
+    photo('dixie1.jpeg'),
+    photo('dixie2.jpeg'),
+    photo('dixie3.jpeg'),
+    photo('dixie4.jpeg'),
+    photo('dixie5.jpeg'),
+    photo('dixie6.jpeg'),
+    photo('dixie7.jpeg'),
   ],
 }
 
@@ -70,7 +78,8 @@ function setupCarousels() {
   carousels.forEach((carousel) => {
     const label = carousel.getAttribute('data-carousel-label') || ''
     const urls = carouselSources[label] || []
-    if (urls.length === 0) return
+    const validUrls = urls.filter(Boolean)
+    if (validUrls.length === 0) return
 
     const viewport = carousel.querySelector('.dog-carousel-viewport')
     const dotsContainer = carousel.querySelector('.dog-carousel-dots')
@@ -80,13 +89,13 @@ function setupCarousels() {
 
     viewport.innerHTML = `
       <div class="dog-carousel-container">
-        ${urls
+        ${validUrls
           .map(
             (url, i) => `
               <div class="dog-carousel-slide">
                 <img
                   src="${url}"
-                  alt="${label} - zdjęcie ${i + 1} z ${urls.length}"
+                  alt="${label} - zdjęcie ${i + 1} z ${validUrls.length}"
                   width="640"
                   height="400"
                   loading="lazy"
@@ -100,7 +109,7 @@ function setupCarousels() {
       </div>
     `
 
-    dotsContainer.innerHTML = urls
+    dotsContainer.innerHTML = validUrls
       .map((_, i) => `<button type="button" class="dog-carousel-dot${i === 0 ? ' is-active' : ''}" aria-label="Przejdź do zdjęcia ${i + 1}"></button>`)
       .join('')
     const dots = Array.from(dotsContainer.querySelectorAll('.dog-carousel-dot'))

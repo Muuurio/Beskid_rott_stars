@@ -140,7 +140,7 @@
   margin: 0 auto;
   padding: 3rem 1.25rem 4rem;
   text-align: center;
-  background-image: linear-gradient(rgba(20, 18, 16, 0.45), rgba(20, 18, 16, 0.45)), url('C:\BeskidRottStars\Beskid_rott_stars\photos\baner.jpg');
+  background-image: linear-gradient(rgba(20, 18, 16, 0.45), rgba(20, 18, 16, 0.45)), url('../photos/baner.jpg');
   background-size: cover;
   background-position: top;
   border-radius: var(--radius);
