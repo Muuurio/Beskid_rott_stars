@@ -2,32 +2,46 @@ import './index.css'
 import './App.css'
 
 const WEB3FORMS_URL = 'https://api.web3forms.com/submit'
-const PHOTOS_PER_DOG = 4
-
+// niżej dodaje się zdjęcia, wystarczy podać ścieżkę do zdjęcia w folderze photos
 const carouselSources = {
   Aston: [
-    'https://picsum.photos/seed/brs-rottweiler-aston-img0/640/400',
-    'https://picsum.photos/seed/brs-rottweiler-aston-img1/640/400',
-    'https://picsum.photos/seed/brs-rottweiler-aston-img2/640/400',
-    'https://picsum.photos/seed/brs-rottweiler-aston-img3/640/400',
+    '/photos/aston4.jpeg',
+    '/photos/aston1.jpeg',
+    '/photos/aston3.jpeg',
+    '/photos/aston5.jpeg',
+    '/photos/aston6.jpeg',
+
+
   ],
   Pola: [
-    'https://picsum.photos/seed/brs-rottweiler-pola-img0/640/400',
-    'https://picsum.photos/seed/brs-rottweiler-pola-img1/640/400',
-    'https://picsum.photos/seed/brs-rottweiler-pola-img2/640/400',
-    'https://picsum.photos/seed/brs-rottweiler-pola-img3/640/400',
+    '/photos/pola4.jpeg',
+    '/photos/pola2.jpeg',
+    '/photos/pola1.jpeg',
+    '/photos/pola6.jpeg',
+    '/photos/pola3.jpeg',
+    '/photos/pola5.jpeg',
+    '/photos/pola7.jpeg',
+    '/photos/pola8.jpeg',
   ],
   Connie: [
-    'https://picsum.photos/seed/brs-boston-terrier-connie-img0/640/400',
-    'https://picsum.photos/seed/brs-boston-terrier-connie-img1/640/400',
-    'https://picsum.photos/seed/brs-boston-terrier-connie-img2/640/400',
-    'https://picsum.photos/seed/brs-boston-terrier-connie-img3/640/400',
+    '/photos/connie1.jpeg',
+    '/photos/connie2.jpeg',
+    '/photos/connie3.jpeg',
+    '/photos/connie4.jpeg',
+    '/photos/connie5.jpeg',
+    '/photos/connie6.jpeg',
+    '/photos/connie7.jpeg',
+    '/photos/connie8.jpeg',
   ],
   Dixie: [
-    'https://picsum.photos/seed/brs-boston-terrier-dixie-img0/640/400',
-    'https://picsum.photos/seed/brs-boston-terrier-dixie-img1/640/400',
-    'https://picsum.photos/seed/brs-boston-terrier-dixie-img2/640/400',
-    'https://picsum.photos/seed/brs-boston-terrier-dixie-img3/640/400',
+    '/photos/dixie1.jpeg',
+    '/photos/pola2.jpeg',
+    '/photos/dixie3.jpeg',
+    '/photos/dixie4.jpeg',
+    '/photos/dixie5.jpeg',
+    '/photos/dixie6.jpeg',
+    '/photos/dixie7.jpeg',
+    '/photos/dixie8.jpeg',
   ],
 }
 
@@ -56,13 +70,18 @@ function setupCarousels() {
   carousels.forEach((carousel) => {
     const label = carousel.getAttribute('data-carousel-label') || ''
     const urls = carouselSources[label] || []
-    if (urls.length !== PHOTOS_PER_DOG) return
+    if (urls.length === 0) return
 
     const image = carousel.querySelector('img')
-    const dots = carousel.querySelectorAll('.dog-carousel-dot')
+    const dotsContainer = carousel.querySelector('.dog-carousel-dots')
     const prevButton = carousel.querySelector('.dog-carousel-btn-prev')
     const nextButton = carousel.querySelector('.dog-carousel-btn-next')
-    if (!image || !prevButton || !nextButton || dots.length !== PHOTOS_PER_DOG) return
+    if (!image || !dotsContainer || !prevButton || !nextButton) return
+
+    dotsContainer.innerHTML = urls
+      .map((_, i) => `<span class="dog-carousel-dot${i === 0 ? ' is-active' : ''}"></span>`)
+      .join('')
+    const dots = dotsContainer.querySelectorAll('.dog-carousel-dot')
 
     let index = 0
     const render = () => {
@@ -91,6 +110,9 @@ function setupCarousels() {
         next()
       }
     })
+
+    // Ensure first slide is synced on initial page load.
+    render()
   })
 }
 
