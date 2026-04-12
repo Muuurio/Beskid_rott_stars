@@ -53,6 +53,45 @@ const carouselSources = {
   ],
 }
 
+let photoLightboxEls
+
+function ensurePhotoLightbox() {
+  if (photoLightboxEls) return photoLightboxEls
+
+  const dialog = document.createElement('dialog')
+  dialog.className = 'photo-lightbox'
+  dialog.setAttribute('aria-label', 'Powiększone zdjęcie')
+  dialog.innerHTML = `
+    <div class="photo-lightbox-layout">
+      <div class="photo-lightbox-panel">
+        <button type="button" class="photo-lightbox-close" aria-label="Zamknij">&times;</button>
+        <img class="photo-lightbox-img" alt="" width="1280" height="800" decoding="async" />
+      </div>
+    </div>
+  `
+  document.body.appendChild(dialog)
+
+  const layout = dialog.querySelector('.photo-lightbox-layout')
+  const panel = dialog.querySelector('.photo-lightbox-panel')
+  const closeBtn = dialog.querySelector('.photo-lightbox-close')
+  const img = dialog.querySelector('.photo-lightbox-img')
+
+  layout.addEventListener('click', () => dialog.close())
+  panel.addEventListener('click', (event) => event.stopPropagation())
+  closeBtn.addEventListener('click', () => dialog.close())
+
+  photoLightboxEls = { dialog, img, closeBtn }
+  return photoLightboxEls
+}
+
+function openPhotoLightbox(src, alt) {
+  const { dialog, img, closeBtn } = ensurePhotoLightbox()
+  img.src = src
+  img.alt = alt
+  dialog.showModal()
+  closeBtn.focus()
+}
+
 function setupMobileMenu() {
   const menuToggle = document.getElementById('menu-toggle')
   const mobileNav = document.getElementById('mobile-nav')
@@ -93,21 +132,41 @@ function setupCarousels() {
           .map(
             (url, i) => `
               <div class="dog-carousel-slide">
-                <img
-                  src="${url}"
-                  alt="${label} - zdjęcie ${i + 1} z ${validUrls.length}"
-                  width="640"
-                  height="400"
-                  loading="lazy"
-                  decoding="async"
-                  draggable="false"
-                />
+                <button
+                  type="button"
+                  class="dog-carousel-expand"
+                  data-slide-index="${i}"
+                  aria-label="Powiększ zdjęcie: ${label}, ${i + 1} z ${validUrls.length}"
+                >
+                  <img
+                    src="${url}"
+                    alt=""
+                    width="640"
+                    height="400"
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                  />
+                </button>
               </div>
             `,
           )
           .join('')}
       </div>
     `
+
+    const slideCount = validUrls.length
+    viewport.querySelectorAll('.dog-carousel-expand').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const slideImg = btn.querySelector('img')
+        if (!slideImg) return
+        const i = Number(btn.getAttribute('data-slide-index'))
+        const altText = Number.isFinite(i)
+          ? `${label} - zdjęcie ${i + 1} z ${slideCount}`
+          : label
+        openPhotoLightbox(slideImg.src, altText)
+      })
+    })
 
     dotsContainer.innerHTML = validUrls
       .map((_, i) => `<button type="button" class="dog-carousel-dot${i === 0 ? ' is-active' : ''}" aria-label="Przejdź do zdjęcia ${i + 1}"></button>`)
