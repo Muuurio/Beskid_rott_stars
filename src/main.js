@@ -2,7 +2,6 @@ import './index.css'
 import './App.css'
 import EmblaCarousel from 'embla-carousel'
 
-const WEB3FORMS_URL = 'https://api.web3forms.com/submit'
 const photoModules = import.meta.glob('../photos/*.{jpeg,jpg,png,JPEG,JPG,PNG}', {
   eager: true,
   import: 'default',
@@ -206,69 +205,6 @@ function setupCarousels() {
   })
 }
 
-function setupContactForm() {
-  const form = document.getElementById('contact-form')
-  const submitButton = document.getElementById('form-submit')
-  const status = document.getElementById('form-status')
-  const error = document.getElementById('form-error')
-  if (!form || !submitButton || !status || !error) return
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault()
-    status.hidden = true
-    error.hidden = true
-    status.textContent = ''
-    error.textContent = ''
-
-    const accessKey = (import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || '').trim()
-    if (!accessKey) {
-      error.textContent = 'Brak klucza Web3Forms. Utwórz plik .env z VITE_WEB3FORMS_ACCESS_KEY.'
-      error.hidden = false
-      return
-    }
-
-    const formData = new FormData(form)
-    const payload = {
-      access_key: accessKey,
-      subject: 'Wiadomość z formularza strony Beskid Rott Stars',
-      name: String(formData.get('name') || '').trim(),
-      email: String(formData.get('email') || '').trim(),
-      message: String(formData.get('message') || '').trim(),
-    }
-
-    submitButton.disabled = true
-    submitButton.textContent = 'Wysyłanie...'
-    form.setAttribute('aria-busy', 'true')
-
-    try {
-      const response = await fetch(WEB3FORMS_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-      const json = await response.json()
-      if (!response.ok || json.success === false) {
-        error.textContent = json.message || 'Nie udało się wysłać wiadomości. Spróbuj ponownie później.'
-        error.hidden = false
-        return
-      }
-      status.textContent = 'Dziękujemy - wiadomość została wysłana.'
-      status.hidden = false
-      form.reset()
-    } catch {
-      error.textContent = 'Błąd sieci. Sprawdź połączenie i spróbuj ponownie.'
-      error.hidden = false
-    } finally {
-      submitButton.disabled = false
-      submitButton.textContent = 'Wyślij'
-      form.setAttribute('aria-busy', 'false')
-    }
-  })
-}
-
 function setCurrentYear() {
   const year = document.getElementById('year')
   if (year) {
@@ -278,5 +214,4 @@ function setCurrentYear() {
 
 setupMobileMenu()
 setupCarousels()
-setupContactForm()
 setCurrentYear()
